@@ -1,0 +1,79 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh label list:*)"'
+          prompt: |
+            You are a technical triage assistant for this Tetris game repository (vanilla JS, no frameworks).
+            The codebase has three files: index.html, style.css, and game.js (~305 lines with the full game logic).
+
+            Key functions in game.js: collide(), tryRotate(), rotateCW(), lockPiece(), clearLines(),
+            spawn(), ghostY(), init(), and the requestAnimationFrame loop().
+            Board is a 20×10 integer matrix. Pieces are objects { type, shape, x, y }.
+
+            A new or updated issue has been filed: #${{ github.event.issue.number }}
+
+            Your tasks (execute them in order):
+
+            1. READ the issue:
+               gh issue view ${{ github.event.issue.number }}
+
+            2. LIST the available labels to confirm the exact label names:
+               gh label list
+
+            3. APPLY appropriate labels — choose ONLY from the existing labels returned by the command above.
+               Do NOT create new labels. Apply as many as are relevant.
+               gh issue edit ${{ github.event.issue.number }} --add-label "<label1>,<label2>"
+
+            4. CHECK if a prior Claude diagnosis comment already exists on this issue:
+               gh issue view ${{ github.event.issue.number }} --comments
+               - If a prior diagnosis exists: post a new comment noting what has changed/updated.
+               - If no prior diagnosis exists: post a fresh diagnosis comment.
+
+            5. POST a diagnostic comment in English using:
+               gh issue comment ${{ github.event.issue.number }} --body "<your diagnosis>"
+
+               The comment MUST follow this exact structure:
+
+               ## 🔍 Issue Diagnosis
+
+               **Summary:** One-sentence description of what the problem is.
+
+               **Type:** (Bug / Feature Request / Documentation / Question / Other)
+
+               **Root Cause Analysis:**
+               Explain the likely root cause. Reference specific functions, variables, or logic in game.js
+               that are involved (e.g. lockPiece(), clearLines(), collide(), dropInterval, board matrix).
+               Be specific about *why* the bug occurs or *what* is missing for a feature.
+
+               **Affected Files / Functions:**
+               - List the files and functions that need to be read or modified to address this issue.
+
+               **Suggested Fix Approach:**
+               A concrete, step-by-step description of how to implement the solution.
+               This will be used by a developer to write the actual code fix.
+
+               **Labels Applied:** List the labels you applied and why each was chosen.
+
+               ---
+               *Automated triage by Claude. Issue: #${{ github.event.issue.number }}*
