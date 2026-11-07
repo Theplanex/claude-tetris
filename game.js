@@ -242,10 +242,7 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   context.save();
   context.globalAlpha = alpha ?? 1;
   skin.draw(context, x * size + 1, y * size + 1, size - 2, skin.colors[colorIndex]);
-  context.restore();
-  context.shadowBlur = 0;
-  context.shadowColor = 'transparent';
-  context.globalAlpha = 1;
+  context.restore(); // restores shadow and alpha state
 }
 
 function clearBoard(context, w, h) {
@@ -376,6 +373,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (e.target && e.target.id === 'skin-select') return;
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
