@@ -230,3 +230,16 @@ kbd {
   background: var(--text-accent);
   color: var(--bg-main);
 }
+
+/* ---- Skin Select ---- */
+#skin-select {
+  background: var(--toggle-bg);
+  color: var(--toggle-color);
+  border: 1px solid var(--toggle-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
