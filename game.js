@@ -421,6 +421,9 @@ function loop(ts) {
 }
 
 function init() {
+  if (started && !gameOver) updateStats(); // guarda stats de la partida abandonada
+  resetConfirms.forEach(c => c.classList.add('hidden'));
+  resetBtns.forEach(b => b.classList.remove('hidden'));
   board = createBoard();
   score = 0;
   lines = 0;
@@ -479,7 +482,7 @@ nameSave.addEventListener('click', commitName);
 resetBtns.forEach((b, i) => wireReset(b, resetConfirms[i]));
 
 const themeToggle = document.getElementById('theme-toggle');
-const savedTheme = localStorage.getItem('tetris-theme') || 'dark';
+const savedTheme = storageGet('tetris-theme') || 'dark';
 if (savedTheme === 'light') {
   document.documentElement.dataset.theme = 'light';
   themeToggle.textContent = '\u{1F319} Dark';
@@ -488,7 +491,7 @@ if (savedTheme === 'light') {
 themeToggle.addEventListener('click', () => {
   const isLight = document.documentElement.dataset.theme === 'light';
   document.documentElement.dataset.theme = isLight ? 'dark' : 'light';
-  localStorage.setItem('tetris-theme', isLight ? 'dark' : 'light');
+  storageSet('tetris-theme', isLight ? 'dark' : 'light');
   themeToggle.textContent = isLight ? '☀ Light' : '\u{1F319} Dark';
 });
 
